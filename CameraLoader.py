@@ -16,12 +16,15 @@ class CamLoader:
         camera: (int, str) Source of camera or video.,
         preprocess: (Callable function) to process the frame before return.
     """
+
     def __init__(self, camera, preprocess=None, ori_return=False):
-        self.stream = cv2.VideoCapture(camera)
-        assert self.stream.isOpened(), 'Cannot read camera source!'
+        self.stream = cv2.VideoCapture("Videos/test.mp4")
+        assert self.stream.isOpened(), "Cannot read camera source!"
         self.fps = self.stream.get(cv2.CAP_PROP_FPS)
-        self.frame_size = (int(self.stream.get(cv2.CAP_PROP_FRAME_WIDTH)),
-                           int(self.stream.get(cv2.CAP_PROP_FRAME_HEIGHT)))
+        self.frame_size = (
+            int(self.stream.get(cv2.CAP_PROP_FRAME_WIDTH)),
+            int(self.stream.get(cv2.CAP_PROP_FRAME_HEIGHT)),
+        )
 
         self.stopped = False
         self.ret = False
@@ -41,7 +44,7 @@ class CamLoader:
             c += 1
             if c > 20:
                 self.stop()
-                raise TimeoutError('Can not get a frame from camera!!!')
+                raise TimeoutError("Can not get a frame from camera!!!")
         return self
 
     def update(self):
@@ -54,6 +57,7 @@ class CamLoader:
 
             self.ret, self.frame = ret, frame
             self.read_lock.release()
+            time.sleep(1 / self.fps)
 
     def grabbed(self):
         """Return `True` if can read a frame."""
@@ -96,12 +100,15 @@ class CamLoader_Q:
         queue_size: (int) Maximum queue size. Default: 256,
         preprocess: (Callable function) to process the frame before return.
     """
+
     def __init__(self, camera, batch_size=1, queue_size=256, preprocess=None):
         self.stream = cv2.VideoCapture(camera)
-        assert self.stream.isOpened(), 'Cannot read camera source!'
+        assert self.stream.isOpened(), "Cannot read camera source!"
         self.fps = self.stream.get(cv2.CAP_PROP_FPS)
-        self.frame_size = (int(self.stream.get(cv2.CAP_PROP_FRAME_WIDTH)),
-                           int(self.stream.get(cv2.CAP_PROP_FRAME_HEIGHT)))
+        self.frame_size = (
+            int(self.stream.get(cv2.CAP_PROP_FRAME_WIDTH)),
+            int(self.stream.get(cv2.CAP_PROP_FRAME_HEIGHT)),
+        )
 
         # Queue for storing each frames.
 
@@ -119,7 +126,7 @@ class CamLoader_Q:
             c += 1
             if c > 20:
                 self.stop()
-                raise TimeoutError('Can not get a frame from camera!!!')
+                raise TimeoutError("Can not get a frame from camera!!!")
         return self
 
     def update(self):
@@ -141,7 +148,7 @@ class CamLoader_Q:
             else:
                 with self.Q.mutex:
                     self.Q.queue.clear()
-            # time.sleep(0.05)
+            time.sleep(1 / self.fps)
 
     def grabbed(self):
         """Return `True` if can read a frame."""
@@ -168,7 +175,7 @@ class CamLoader_Q:
             self.stream.release()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     fps_time = 0
 
     # Using threading.
@@ -176,29 +183,43 @@ if __name__ == '__main__':
     while cam.grabbed():
         frames = cam.getitem()
 
-        frames = cv2.putText(frames, 'FPS: %f' % (1.0 / (time.time() - fps_time)),
-                             (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+        frames = cv2.putText(
+            frames,
+            "FPS: %f" % (1.0 / (time.time() - fps_time)),
+            (10, 20),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.5,
+            (0, 255, 0),
+            2,
+        )
         fps_time = time.time()
-        cv2.imshow('frame', frames)
+        cv2.imshow("frame", frames)
 
-        if cv2.waitKey(1) & 0xFF == ord('q'):
+        if cv2.waitKey(1) & 0xFF == ord("q"):
             break
     cam.stop()
     cv2.destroyAllWindows()
 
     # Normal video capture.
-    """cam = cv2.VideoCapture(0)
-    while True:
-        ret, frame = cam.read()
-        if ret:
-            #time.sleep(0.05)
-            #frame = (cv2.flip(frame, 1) / 255.).astype(np.float)
+    # cam = cv2.VideoCapture(0)
+    # while True:
+    #     ret, frame = cam.read()
+    #     if ret:
+    #         # time.sleep(0.05)
+    #         # frame = (cv2.flip(frame, 1) / 255.).astype(np.float)
 
-            frame = cv2.putText(frame, 'FPS: %f' % (1.0 / (time.time() - fps_time)),
-                                (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-            fps_time = time.time()
-            cv2.imshow('frame', frame)
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
-    cam.release()
-    cv2.destroyAllWindows()"""
+    #         frame = cv2.putText(
+    #             frame,
+    #             "FPS: %f" % (1.0 / (time.time() - fps_time)),
+    #             (10, 20),
+    #             cv2.FONT_HERSHEY_SIMPLEX,
+    #             0.5,
+    #             (0, 255, 0),
+    #             2,
+    #         )
+    #         fps_time = time.time()
+    #         cv2.imshow("frame", frame)
+    #         if cv2.waitKey(1) & 0xFF == ord("q"):
+    #             break
+    # cam.release()
+    # cv2.destroyAllWindows()

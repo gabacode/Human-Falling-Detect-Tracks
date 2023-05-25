@@ -20,13 +20,16 @@ class TinyYOLOv3_onecls(object):
         conf_thres: (float) Minimum Confidence threshold of predicted bboxs to cut off.,
         device: (str) Device to load the model on 'cpu' or 'cuda'.
     """
-    def __init__(self,
-                 input_size=416,
-                 config_file='Models/yolo-tiny-onecls/yolov3-tiny-onecls.cfg',
-                 weight_file='Models/yolo-tiny-onecls/best-model.pth',
-                 nms=0.2,
-                 conf_thres=0.45,
-                 device='cuda'):
+
+    def __init__(
+        self,
+        input_size=416,
+        config_file="Models/yolo-tiny-onecls/yolov3-tiny-onecls.cfg",
+        weight_file="Models/yolo-tiny-onecls/best-model.pth",
+        nms=0.2,
+        conf_thres=0.45,
+        device="cuda",
+    ):
         self.input_size = input_size
         self.model = Darknet(config_file).to(device)
         self.model.load_state_dict(torch.load(weight_file))
@@ -73,10 +76,7 @@ class TinyYOLOv3_onecls(object):
 
 
 class ThreadDetection(object):
-    def __init__(self,
-                 dataloader,
-                 model,
-                 queue_size=256):
+    def __init__(self, dataloader, model, queue_size=256):
         self.model = model
 
         self.dataloader = dataloader
@@ -108,10 +108,3 @@ class ThreadDetection(object):
 
     def __len__(self):
         return self.Q.qsize()
-
-
-
-
-
-
-
